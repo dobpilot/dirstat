@@ -13,17 +13,13 @@ import (
 	"github.com/charlievieth/fastwalk"
 )
 
-func statFile(path string, fileInfo os.FileInfo) {
-	fileInfo.Size()
-}
-
-type DirStatInfo struct {
+type FileInfo struct {
 	Path  string `json:"Path"`
 	IsDir bool   `json:"IsDir"`
 	Size  int64  `json:"Size"`
 }
 
-func exportJSON(w io.Writer, results []DirStatInfo) {
+func toJSON(w io.Writer, results []FileInfo) {
 	json.NewEncoder(w).Encode(results)
 }
 
@@ -52,9 +48,7 @@ func main() {
 		Follow: false,
 	}
 
-	dirs := make([]DirStatInfo, 0)
-
-	//fmt.Println(fastwalk.DefaultNumWorkers())
+	files := make([]FileInfo, 0)
 
 	walkFn := func(path string, info fs.DirEntry, err error) error {
 
@@ -64,7 +58,7 @@ func main() {
 
 		inf, _ := info.Info()
 
-		dirs = append(dirs, DirStatInfo{Path: path, IsDir: info.IsDir(), Size: inf.Size()})
+		files = append(files, FileInfo{Path: path, IsDir: info.IsDir(), Size: inf.Size()})
 
 		return nil
 	}
@@ -79,6 +73,5 @@ func main() {
 
 	}
 
-	exportJSON(os.Stdout, dirs)
-
+	toJSON(os.Stdout, files)
 }
